@@ -15,16 +15,62 @@ import {
   UncheckedSquare,
 } from "./icons";
 import { Input } from "./input";
+import { DefaultChatTransport } from "ai";
+import { wrapFetchWithPayment } from "thirdweb/x402";
+import { useActiveWallet } from "thirdweb/react";
+import { client } from "../lib/thirdweb.client";
+import { Wallet } from "thirdweb/wallets";
+import { SignInButton } from "./sign-in-button";
 
 export function Chat() {
+  const wallet = useActiveWallet();
+  if (!wallet) {
+    return (
+      <div className="flex flex-col gap-4 items-center justify-center h-dvh">
+        <h3 className="text-2xl font-bold">Sign in to continue</h3>
+        <SignInButton />
+      </div>
+    );
+  }
+  return <ChatInner wallet={wallet} />;
+}
+
+function ChatInner(props: { wallet: Wallet }) {
   const [input, setInput] = useState<string>("");
   const [selectedModelId, setSelectedModelId] = useState<modelID>("sonnet-3.7");
   const [isReasoningEnabled, setIsReasoningEnabled] = useState<boolean>(true);
 
+  const fetchWithPayment = wrapFetchWithPayment(
+    fetch,
+    client,
+    props.wallet
+  ) as typeof globalThis.fetch;
+  const transport = new DefaultChatTransport({
+    fetch: fetchWithPayment,
+  });
+
   const { messages, sendMessage, status, stop } = useChat({
     id: "primary",
-    onError: () => {
-      toast.error("An error occurred, please try again!");
+    transport,
+    onError: (error) => {
+      try {
+        const errorData = JSON.parse(error.message);
+        if (errorData.error === "insufficient_funds" && errorData.fundWalletLink) {
+          const topUpUrl = errorData.fundWalletLink;
+          toast.info("Insufficient funds", {
+            description: "Top up your wallet to continue",
+            action: {
+              label: "Top Up",
+              onClick: () => window.open(topUpUrl, "_blank"),
+            },
+            duration: 10000, // Show for 10 seconds
+          });
+        } else {
+          toast.error(`An error occurred: ${errorData.errorMessage}`);
+        }
+      } catch {
+        toast.error(`An error occurred: ${error.message}`);
+      }
     },
   });
 
@@ -37,7 +83,7 @@ export function Chat() {
         {
           "justify-between": messages.length > 0,
           "justify-center gap-4": messages.length === 0,
-        },
+        }
       )}
     >
       {messages.length > 0 ? (
@@ -45,10 +91,11 @@ export function Chat() {
       ) : (
         <div className="flex flex-col gap-0.5 sm:text-2xl text-xl w-full">
           <div className="flex flex-row gap-2 items-center">
-            <div>Welcome to the AI SDK Reasoning Preview.</div>
+            <div>Pay as you go for AI inference.</div>
           </div>
-          <div className="dark:text-zinc-500 text-zinc-400">
-            What would you like me to think about today?
+          <div className="dark:text-zinc-500 text-zinc-400 text-sm">
+            Only pay for the tokens you use, no subscription or API key
+            required.
           </div>
         </div>
       )}
@@ -85,7 +132,7 @@ export function Chat() {
                 "relative w-fit text-sm p-1.5 rounded-lg flex flex-row items-center gap-2 dark:hover:bg-zinc-600 hover:bg-zinc-200 cursor-pointer disabled:opacity-50",
                 {
                   "dark:bg-zinc-600 bg-zinc-200": isReasoningEnabled,
-                },
+                }
               )}
               onClick={() => {
                 setIsReasoningEnabled(!isReasoningEnabled);
@@ -130,7 +177,7 @@ export function Chat() {
                 {
                   "dark:bg-zinc-200 dark:text-zinc-500":
                     isGeneratingResponse || input === "",
-                },
+                }
               )}
               onClick={() => {
                 if (input === "") {

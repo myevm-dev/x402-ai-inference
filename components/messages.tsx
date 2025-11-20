@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon, SpinnerIcon } from "./icons";
 import { UIMessage } from "ai";
+import { PRICE_PER_INFERENCE_TOKEN_WEI } from "@/lib/constants";
 
 interface ReasoningPart {
   type: "reasoning";
@@ -108,6 +109,24 @@ export function TextMessagePart({ text }: TextMessagePartProps) {
   );
 }
 
+interface CostCardProps {
+  totalTokens: number;
+}
+
+export function CostCard({ totalTokens }: CostCardProps) {
+  const costInWei = PRICE_PER_INFERENCE_TOKEN_WEI * totalTokens;
+  const costInUsdc = costInWei / 10 ** 6; // USDC has 6 decimals
+
+  return (
+    <div className="flex flex-row items-center gap-2 text-xs dark:text-zinc-500 text-zinc-600 mt-2">
+      <div className="dark:bg-zinc-800 bg-zinc-200 rounded-lg px-3 py-1.5">
+        Inference Cost -{" "}
+        <span className="font-medium">${costInUsdc.toFixed(6)}</span>
+      </div>
+    </div>
+  );
+}
+
 interface MessagesProps {
   messages: Array<UIMessage>;
   status: "error" | "submitted" | "streaming" | "ready";
@@ -125,49 +144,58 @@ export function Messages({ messages, status }: MessagesProps) {
 
   return (
     <div
-      className="flex overflow-y-scroll flex-col gap-8 items-center w-full"
+      className="flex overflow-y-scroll flex-col gap-8 items-center w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       ref={messagesRef}
     >
-      {messages.map((message) => (
-        <div
-          key={message.id}
-          className={cn(
-            "flex flex-col gap-4 w-full last-of-type:mb-12 first-of-type:mt-16",
-          )}
-        >
-          <div
-            className={cn("flex flex-col gap-4", {
-              "dark:bg-zinc-800 bg-zinc-200 p-2 rounded-xl w-fit ml-auto":
-                message.role === "user",
-              "": message.role === "assistant",
-            })}
-          >
-            {message.parts.map((part, partIndex) => {
-              if (part.type === "text") {
-                return (
-                  <TextMessagePart
-                    key={`${message.id}-${partIndex}`}
-                    text={part.text}
-                  />
-                );
-              }
+      {messages.map((message) => {
+        // Extract token usage from message metadata if available
+        const metadata = message.metadata as any;
+        const totalTokens = metadata?.totalTokens;
 
-              if (part.type === "reasoning") {
-                return (
-                  <ReasoningMessagePart
-                    key={`${message.id}-${partIndex}`}
-                    part={part}
-                    isReasoning={
-                      status === "streaming" &&
-                      partIndex === message.parts.length - 1
-                    }
-                  />
-                );
-              }
-            })}
+        return (
+          <div
+            key={message.id}
+            className={cn(
+              "flex flex-col gap-4 w-full last-of-type:mb-12 first-of-type:mt-16",
+            )}
+          >
+            <div
+              className={cn("flex flex-col gap-4", {
+                "dark:bg-zinc-800 bg-zinc-200 p-2 rounded-xl w-fit ml-auto":
+                  message.role === "user",
+                "": message.role === "assistant",
+              })}
+            >
+              {message.parts.map((part, partIndex) => {
+                if (part.type === "text") {
+                  return (
+                    <TextMessagePart
+                      key={`${message.id}-${partIndex}`}
+                      text={part.text}
+                    />
+                  );
+                }
+
+                if (part.type === "reasoning") {
+                  return (
+                    <ReasoningMessagePart
+                      key={`${message.id}-${partIndex}`}
+                      part={part}
+                      isReasoning={
+                        status === "streaming" &&
+                        partIndex === message.parts.length - 1
+                      }
+                    />
+                  );
+                }
+              })}
+              {message.role === "assistant" && totalTokens && (
+                <CostCard totalTokens={totalTokens} />
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {status === "submitted" && (
         <div className="mb-12 w-full text-zinc-500">Hmm...</div>

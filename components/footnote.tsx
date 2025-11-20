@@ -6,23 +6,15 @@ export function Footnote() {
       This preview is built using{' '}
       <Link
         className="underline underline-offset-2"
-        href="https://nextjs.org/"
+        href="https://thirdweb.com/x402"
         target="_blank"
       >
-        Next.js
-      </Link>{' '}
-      and the{' '}
-      <Link
-        className="underline underline-offset-2"
-        href="https://sdk.vercel.ai/"
-        target="_blank"
-      >
-        AI SDK
+        thirdweb x402 stack
       </Link>
-      . Read more about how to use reasoning models in your applications in our{' '}
+      . Read more about how to use integrate this into your application in our{' '}
       <Link
         className="underline underline-offset-2"
-        href="https://sdk.vercel.ai/docs/ai-sdk-ui/chatbot#reasoning"
+        href="https://portal.thirdweb.com/x402"
         target="_blank"
       >
         documentation
