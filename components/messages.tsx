@@ -149,7 +149,7 @@ export function Messages({ messages, status }: MessagesProps) {
     >
       {messages.map((message) => {
         // Extract token usage from message metadata if available
-        const metadata = message.metadata as any;
+        const metadata = message.metadata as { totalTokens: number } | undefined;
         const totalTokens = metadata?.totalTokens;
 
         return (
