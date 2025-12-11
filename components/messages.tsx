@@ -111,11 +111,16 @@ export function TextMessagePart({ text }: TextMessagePartProps) {
 
 interface CostCardProps {
   totalTokens: number;
+  allowanceLeft?: string;
 }
 
-export function CostCard({ totalTokens }: CostCardProps) {
+export function CostCard({ totalTokens, allowanceLeft }: CostCardProps) {
   const costInWei = PRICE_PER_INFERENCE_TOKEN_WEI * totalTokens;
   const costInUsdc = costInWei / 10 ** 6; // USDC has 6 decimals
+
+  const allowanceLeftUsdc = allowanceLeft
+    ? Number(BigInt(allowanceLeft)) / 10 ** 6
+    : null;
 
   return (
     <div className="flex flex-row items-center gap-2 text-xs dark:text-zinc-500 text-zinc-600 mt-2">
@@ -123,6 +128,12 @@ export function CostCard({ totalTokens }: CostCardProps) {
         Inference Cost -{" "}
         <span className="font-medium">${costInUsdc.toFixed(6)}</span>
       </div>
+      {allowanceLeftUsdc !== null && (
+        <div className="dark:bg-zinc-800 bg-zinc-200 rounded-lg px-3 py-1.5">
+          Allowance Left -{" "}
+          <span className="font-medium">${allowanceLeftUsdc.toFixed(6)}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -149,8 +160,9 @@ export function Messages({ messages, status }: MessagesProps) {
     >
       {messages.map((message) => {
         // Extract token usage from message metadata if available
-        const metadata = message.metadata as { totalTokens: number } | undefined;
+        const metadata = message.metadata as { totalTokens: number; allowanceLeft?: string } | undefined;
         const totalTokens = metadata?.totalTokens;
+        const allowanceLeft = metadata?.allowanceLeft;
 
         return (
           <div
@@ -190,7 +202,7 @@ export function Messages({ messages, status }: MessagesProps) {
                 }
               })}
               {message.role === "assistant" && totalTokens && (
-                <CostCard totalTokens={totalTokens} />
+                <CostCard totalTokens={totalTokens} allowanceLeft={allowanceLeft} />
               )}
             </div>
           </div>

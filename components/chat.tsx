@@ -15,7 +15,7 @@ import {
 import { Input } from "./input";
 import { DefaultChatTransport } from "ai";
 import { wrapFetchWithPayment } from "thirdweb/x402";
-import { useActiveWallet } from "thirdweb/react";
+import { useActiveWallet, useFetchWithPayment } from "thirdweb/react";
 import { client } from "../lib/thirdweb.client";
 import { Wallet } from "thirdweb/wallets";
 import { SignInButton } from "./sign-in-button";
@@ -36,14 +36,12 @@ export function Chat() {
 function ChatInner(props: { wallet: Wallet }) {
   const [input, setInput] = useState<string>("");
   const [selectedModelId, setSelectedModelId] = useState<modelID>("gpt-5.1");
+  const { fetchWithPayment } = useFetchWithPayment(client, {
+    parseAs: "raw",
+  });
 
-  const fetchWithPayment = wrapFetchWithPayment(
-    fetch,
-    client,
-    props.wallet
-  ) as typeof globalThis.fetch;
   const transport = new DefaultChatTransport({
-    fetch: fetchWithPayment,
+    fetch: fetchWithPayment as typeof globalThis.fetch,
   });
 
   const { messages, sendMessage, status, stop } = useChat({

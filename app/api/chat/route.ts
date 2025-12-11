@@ -6,13 +6,22 @@ import {
   UIMessage,
 } from "ai";
 import { NextRequest } from "next/server";
-import { settlePayment, facilitator, verifyPayment, PaymentArgs } from "thirdweb/x402";
+import {
+  settlePayment,
+  facilitator,
+  verifyPayment,
+  PaymentArgs,
+} from "thirdweb/x402";
 import { arbitrum } from "thirdweb/chains";
 import {
   serverClient,
   serverWalletAddress,
 } from "../../../lib/thirdweb.server";
-import { MAX_INFERENCE_TOKENS_PER_CALL, paymentToken, PRICE_PER_INFERENCE_TOKEN_WEI } from "../../../lib/constants";
+import {
+  MAX_INFERENCE_TOKENS_PER_CALL,
+  paymentToken,
+  PRICE_PER_INFERENCE_TOKEN_WEI,
+} from "../../../lib/constants";
 
 const twFacilitator = facilitator({
   client: serverClient,
@@ -26,6 +35,11 @@ const asset = {
 export async function POST(request: NextRequest) {
   const paymentData = request.headers.get("x-payment");
 
+  const maxAmount =
+    PRICE_PER_INFERENCE_TOKEN_WEI * MAX_INFERENCE_TOKENS_PER_CALL;
+  const minAmount =
+    PRICE_PER_INFERENCE_TOKEN_WEI * (MAX_INFERENCE_TOKENS_PER_CALL / 10);
+
   const paymentArgs: PaymentArgs = {
     facilitator: twFacilitator,
     method: "POST",
@@ -33,17 +47,17 @@ export async function POST(request: NextRequest) {
     scheme: "upto",
     // max amount to be approved by the user
     price: {
-      amount: (PRICE_PER_INFERENCE_TOKEN_WEI * MAX_INFERENCE_TOKENS_PER_CALL).toString(),
+      amount: maxAmount.toString(),
       asset,
     },
     // minimum required, if approval goes below this, a new payment will be requested
     minPrice: {
-      amount: (PRICE_PER_INFERENCE_TOKEN_WEI * (MAX_INFERENCE_TOKENS_PER_CALL / 10)).toString(),
+      amount: minAmount.toString(),
       asset,
     },
     resourceUrl: request.url,
     paymentData,
-  }
+  };
 
   // verify the signed payment data with maximum payment amount before doing any work
   const result = await verifyPayment(paymentArgs);
@@ -54,6 +68,8 @@ export async function POST(request: NextRequest) {
       headers: result.responseHeaders,
     });
   }
+
+  const allowanceLeft = BigInt(result.allowance || maxAmount);
 
   // then, process the chat request and do the inference
   const {
@@ -99,6 +115,7 @@ export async function POST(request: NextRequest) {
             amount: finalPrice.toString(),
             asset,
           },
+          minPrice: undefined, // no minimum price for settlement
         });
         console.log(`Payment result: ${JSON.stringify(result)}`);
       } catch (error) {
@@ -110,9 +127,18 @@ export async function POST(request: NextRequest) {
   return stream.toUIMessageStreamResponse({
     sendReasoning: true,
     messageMetadata: ({ part }) => {
-      if (part.type === 'finish') {
+      if (part.type === "finish") {
         return {
           totalTokens: part.totalUsage.totalTokens,
+          allowanceLeft: part.totalUsage.totalTokens
+            ? (() => {
+                const remaining =
+                  allowanceLeft -
+                  BigInt(part.totalUsage.totalTokens) *
+                    BigInt(PRICE_PER_INFERENCE_TOKEN_WEI);
+                return (remaining < BigInt(0) ? BigInt(0) : remaining).toString();
+              })()
+            : allowanceLeft.toString(),
         };
       }
       return undefined;
