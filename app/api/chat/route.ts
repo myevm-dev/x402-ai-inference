@@ -31,8 +31,14 @@ export async function POST(request: NextRequest) {
     method: "POST",
     network: arbitrum,
     scheme: "upto",
+    // max amount to be approved by the user
     price: {
       amount: (PRICE_PER_INFERENCE_TOKEN_WEI * MAX_INFERENCE_TOKENS_PER_CALL).toString(),
+      asset,
+    },
+    // minimum required, if approval goes below this, a new payment will be requested
+    minPrice: {
+      amount: (PRICE_PER_INFERENCE_TOKEN_WEI * (MAX_INFERENCE_TOKENS_PER_CALL / 10)).toString(),
       asset,
     },
     resourceUrl: request.url,
