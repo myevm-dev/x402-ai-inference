@@ -50,17 +50,19 @@ export async function POST(request: NextRequest) {
       amount: maxAmount.toString(),
       asset,
     },
-    // minimum required, if approval goes below this, a new payment will be requested
-    minPrice: {
-      amount: minAmount.toString(),
-      asset,
-    },
     resourceUrl: request.url,
     paymentData,
   };
 
   // verify the signed payment data with maximum payment amount before doing any work
-  const result = await verifyPayment(paymentArgs);
+  const result = await verifyPayment({
+    ...paymentArgs,
+     // minimum required, if approval goes below this, a new signature will be requested
+     minPrice: {
+      amount: minAmount.toString(),
+      asset,
+    },
+  });
 
   if (result.status !== 200) {
     return Response.json(result.responseBody, {
@@ -111,11 +113,11 @@ export async function POST(request: NextRequest) {
       try {
         const result = await settlePayment({
           ...paymentArgs,
+          // final price to be settled
           price: {
             amount: finalPrice.toString(),
             asset,
           },
-          minPrice: undefined, // no minimum price for settlement
         });
         console.log(`Payment result: ${JSON.stringify(result)}`);
       } catch (error) {

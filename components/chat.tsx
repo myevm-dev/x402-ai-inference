@@ -7,37 +7,19 @@ import { useState } from "react";
 import { Messages } from "./messages";
 import { modelID, models } from "@/lib/models";
 import { Footnote } from "./footnote";
-import {
-  ArrowUpIcon,
-  ChevronDownIcon,
-  StopIcon,
-} from "./icons";
+import { ArrowUpIcon, ChevronDownIcon, StopIcon } from "./icons";
 import { Input } from "./input";
 import { DefaultChatTransport } from "ai";
-import { wrapFetchWithPayment } from "thirdweb/x402";
-import { useActiveWallet, useFetchWithPayment } from "thirdweb/react";
+import { useFetchWithPayment } from "thirdweb/react";
 import { client } from "../lib/thirdweb.client";
-import { Wallet } from "thirdweb/wallets";
-import { SignInButton } from "./sign-in-button";
+import { connectOptions } from "./sign-in-button";
 
 export function Chat() {
-  const wallet = useActiveWallet();
-  if (!wallet) {
-    return (
-      <div className="flex flex-col gap-4 items-center justify-center h-dvh">
-        <h3 className="text-2xl font-bold">Sign in to continue</h3>
-        <SignInButton />
-      </div>
-    );
-  }
-  return <ChatInner wallet={wallet} />;
-}
-
-function ChatInner(props: { wallet: Wallet }) {
   const [input, setInput] = useState<string>("");
   const [selectedModelId, setSelectedModelId] = useState<modelID>("gpt-5.1");
   const { fetchWithPayment } = useFetchWithPayment(client, {
     parseAs: "raw",
+    connectOptions,
   });
 
   const transport = new DefaultChatTransport({
@@ -50,7 +32,10 @@ function ChatInner(props: { wallet: Wallet }) {
     onError: (error) => {
       try {
         const errorData = JSON.parse(error.message);
-        if (errorData.error === "insufficient_funds" && errorData.fundWalletLink) {
+        if (
+          errorData.error === "insufficient_funds" &&
+          errorData.fundWalletLink
+        ) {
           const topUpUrl = errorData.fundWalletLink;
           toast.info("Insufficient funds", {
             description: "Top up your wallet to continue",
