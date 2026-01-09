@@ -3,7 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import type { Metadata } from "next";
 import Image from "next/image";
-
+import Link from "next/link";
 import "./globals.css";
 
 import { ThirdwebProvider } from "thirdweb/react";
@@ -27,10 +27,10 @@ export default function RootLayout({
       >
         <body>
           {/* Header */}
-          <div className="fixed inset-x-0 top-0 z-50 bg-white dark:bg-zinc-950">
+          <div className="fixed inset-x-0 top-0 z-50 bg-white dark:bg-zinc-950 border-b border-green-500/60">
             <div className="flex items-center justify-between p-4 max-w-7xl mx-auto">
               {/* Logo + Title */}
-              <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-3">
                 <Image
                   src="/syncfoliologo.png"
                   alt="SyncFolio Logo"
@@ -41,7 +41,8 @@ export default function RootLayout({
                 <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-100">
                   Sync Gigs
                 </h3>
-              </div>
+              </Link>
+
 
               {/* Wallet */}
               <div className="flex items-center gap-4">
