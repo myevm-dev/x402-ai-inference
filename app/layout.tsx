@@ -1,53 +1,60 @@
 import { Toaster } from "sonner";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import Link from "next/link";
 import type { Metadata } from "next";
+import Image from "next/image";
 
 import "./globals.css";
 
 import { ThirdwebProvider } from "thirdweb/react";
 import { SignInButton } from "../components/sign-in-button";
-import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Reasoning Preview",
-  description:
-    "This is a preview of using reasoning models with Next.js and the AI SDK.",
+  title: "Sync Gigs",
+  description: "AI inference powered by x402 micropayments.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <ThirdwebProvider>
-      <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <html
+        lang="en"
+        className={`${GeistSans.variable} ${GeistMono.variable}`}
+      >
         <body>
-          <div className="fixed right-0 left-0 w-full top-0 bg-white dark:bg-zinc-950 mx-auto">
-            <div className="flex justify-between items-center p-4">
-              <div className="flex flex-row items-center gap-2 shrink-0 ">
-                <span className="jsx-e3e12cc6f9ad5a71 flex flex-row items-center gap-2 home-links">
-                  <Link
-                    className="text-zinc-800 dark:text-zinc-100 -translate-y-[.5px]"
-                    rel="noopener"
-                    target="_blank"
-                    href="https://thirdweb.com/"
-                  >
-                    <Image src="/thirdweb.png" alt="Thirdweb Logo" width={48} height={48} />
-                  </Link>
-                  <h3 className="text-xl font-bold">thirdweb</h3>
-                </span>
+          {/* Header */}
+          <div className="fixed inset-x-0 top-0 z-50 bg-white dark:bg-zinc-950">
+            <div className="flex items-center justify-between p-4 max-w-7xl mx-auto">
+              {/* Logo + Title */}
+              <div className="flex items-center gap-3">
+                <Image
+                  src="/syncfoliologo.png"
+                  alt="SyncFolio Logo"
+                  width={40}
+                  height={40}
+                  priority
+                />
+                <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-100">
+                  Sync Gigs
+                </h3>
               </div>
-              <div className="flex flex-row items-center gap-4 shrink-0">
-           
+
+              {/* Wallet */}
+              <div className="flex items-center gap-4">
                 <SignInButton />
               </div>
             </div>
           </div>
+
+          {/* Toasts */}
           <Toaster position="top-center" />
-          {children}
+
+          {/* Page Content */}
+          <main className="pt-20">{children}</main>
         </body>
       </html>
     </ThirdwebProvider>
