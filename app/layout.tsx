@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 import "./globals.css";
-import { StarButton } from "@/components/star-button";
+
 import { ThirdwebProvider } from "thirdweb/react";
 import { SignInButton } from "../components/sign-in-button";
 import Image from "next/image";
@@ -41,7 +41,7 @@ export default function RootLayout({
                 </span>
               </div>
               <div className="flex flex-row items-center gap-4 shrink-0">
-                <StarButton />
+           
                 <SignInButton />
               </div>
             </div>
