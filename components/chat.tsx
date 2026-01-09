@@ -6,7 +6,6 @@ import { useChat } from "@ai-sdk/react";
 import { useState } from "react";
 import { Messages } from "./messages";
 import { modelID, models } from "@/lib/models";
-import { Footnote } from "./footnote";
 import { ArrowUpIcon, ChevronDownIcon, StopIcon } from "./icons";
 import { Input } from "./input";
 import { DefaultChatTransport } from "ai";
@@ -16,7 +15,7 @@ import { connectOptions } from "./sign-in-button";
 
 export function Chat() {
   const [input, setInput] = useState<string>("");
-  const [selectedModelId, setSelectedModelId] = useState<modelID>("gpt-5.1");
+  const [selectedModelId, setSelectedModelId] = useState<modelID>("sonnet-3.7");
   const { fetchWithPayment } = useFetchWithPayment(client, {
     parseAs: "raw",
     connectOptions,
@@ -163,7 +162,7 @@ export function Chat() {
           </div>
         </div>
 
-        <Footnote />
+      
       </div>
     </div>
   );
