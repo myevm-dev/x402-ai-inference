@@ -11,14 +11,14 @@ import { Input } from "./input";
 import { DefaultChatTransport } from "ai";
 import { useFetchWithPayment } from "thirdweb/react";
 import { client } from "../lib/thirdweb.client";
-import { connectOptions } from "./sign-in-button";
+import { connectEmbedOptions } from "./sign-in-button";
 
 export function Chat() {
   const [input, setInput] = useState<string>("");
   const [selectedModelId, setSelectedModelId] = useState<modelID>("sonnet-3.7");
   const { fetchWithPayment } = useFetchWithPayment(client, {
     parseAs: "raw",
-    connectOptions,
+    connectOptions: connectEmbedOptions,
   });
 
   const transport = new DefaultChatTransport({

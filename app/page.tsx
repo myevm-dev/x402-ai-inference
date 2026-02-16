@@ -5,7 +5,7 @@ export default function Home() {
     <main className="flex min-h-screen items-center justify-center bg-black text-white">
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 max-w-5xl w-full px-2">
 
-        <Chat/>
+  
 
       </div>
     </main>

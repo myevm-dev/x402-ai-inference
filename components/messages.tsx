@@ -210,7 +210,7 @@ export function Messages({ messages, status }: MessagesProps) {
       })}
 
       {status === "submitted" && (
-        <div className="mb-12 w-full text-zinc-500">Hmm...</div>
+        <div className="mb-12 w-full text-zinc-500">working...</div>
       )}
     </div>
   );

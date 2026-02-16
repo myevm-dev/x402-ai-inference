@@ -12,7 +12,7 @@ import {
   verifyPayment,
   PaymentArgs,
 } from "thirdweb/x402";
-import { arbitrum } from "thirdweb/chains";
+import { optimism } from "thirdweb/chains";
 import {
   serverClient,
   serverWalletAddress,
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
   const paymentArgs: PaymentArgs = {
     facilitator: twFacilitator,
     method: "POST",
-    network: arbitrum,
+    network: "optimism",
     scheme: "upto",
     // max amount to be approved by the user
     price: {

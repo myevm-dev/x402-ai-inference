@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
+import { SearchBar } from "../components/SearchBar";
 
 import { ThirdwebProvider } from "thirdweb/react";
 import { SignInButton } from "../components/sign-in-button";
@@ -51,11 +52,16 @@ export default function RootLayout({
             </div>
           </div>
 
+          <div className="fixed inset-x-0 top-[73px] z-40">
+            <SearchBar />
+          </div>
+
           {/* Toasts */}
           <Toaster position="top-center" />
 
           {/* Page Content */}
-          <main className="pt-20">{children}</main>
+          <main className="pt-36">{children}</main>
+
         </body>
       </html>
     </ThirdwebProvider>
