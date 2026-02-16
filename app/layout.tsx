@@ -10,7 +10,7 @@ import { ThirdwebProvider } from "thirdweb/react";
 import { SignInButton } from "../components/sign-in-button";
 
 export const metadata: Metadata = {
-  title: "Sync Gigs",
+  title: ".",
   description: "AI inference powered by x402 micropayments.",
 };
 
@@ -39,7 +39,7 @@ export default function RootLayout({
                   priority
                 />
                 <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-100">
-                  Sync Gigs
+                  .
                 </h3>
               </Link>
 

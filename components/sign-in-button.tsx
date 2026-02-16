@@ -30,11 +30,7 @@ export const connectOptions: ConnectButtonProps = {
   supportedTokens: {
     [paymentChain.id]: [paymentToken],
   },
-  detailsButton: {
-    displayBalanceToken: {
-      [paymentChain.id]: paymentToken.address,
-    },
-  },
+  
 };
 
 // Important: render the actual thirdweb component only on the client
